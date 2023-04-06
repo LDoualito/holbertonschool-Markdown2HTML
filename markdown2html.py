@@ -1,10 +1,8 @@
 #!/usr/bin/python3
-
 """
 Script that converts Markdown to HTML
 Usage: ./markdown2html.py README.md README.html
 """
-
 import sys
 import os.path
 import markdown
