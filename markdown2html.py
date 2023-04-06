@@ -1,5 +1,20 @@
 #!/usr/bin/python3
 
+"""
+This script converts a Markdown file to HTML.
+
+Usage: ./markdown2html.py <inputfile> <outputfile>
+
+Arguments:
+    inputfile: The name of the Markdown file to convert to HTML.
+    outputfile: The name of the output HTML file.
+
+If the input file does not exist, the script will print an error message to
+stderr and exit with status code 1. If the conversion is successful, the output
+HTML file will be created with the converted content and the script will exit
+with status code 0.
+"""
+
 import sys
 import os
 import markdown
