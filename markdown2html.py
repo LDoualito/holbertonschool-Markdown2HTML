@@ -1,41 +1,37 @@
 #!/usr/bin/python3
-
 """
-This script converts a Markdown file to HTML.
+Script that converts a markdown file to an HTML file.
 
-Usage: ./markdown2html.py <inputfile> <outputfile>
-
-Arguments:
-    inputfile: The name of the Markdown file to convert to HTML.
-    outputfile: The name of the output HTML file.
-
-If the input file does not exist, the script will print an error message to
-stderr and exit with status code 1. If the conversion is successful, the output
-HTML file will be created with the converted content and the script will exit
-with status code 0.
+Usage: ./markdown2html.py README.md README.html
 """
 
 import sys
 import os
 import markdown
 
-if len(sys.argv) < 3:
-    print("Usage: ./markdown2html.py <inputfile> <outputfile>", file=sys.stderr)
-    sys.exit(1)
 
-input_file = sys.argv[1]
-output_file = sys.argv[2]
+def main():
+    # Check that the correct number of arguments are provided
+    if len(sys.argv) != 3:
+        print("Usage: ./markdown2html.py README.md README.html", file=sys.stderr)
+        sys.exit(1)
 
-if not os.path.isfile(input_file):
-    print(f"Missing {input_file}", file=sys.stderr)
-    sys.exit(1)
+    # Check if the input file exists
+    if not os.path.isfile(sys.argv[1]):
+        print(f"Missing {sys.argv[1]}", file=sys.stderr)
+        sys.exit(1)
 
-with open(input_file, 'r') as f:
-    text = f.read()
+    # Read the markdown file
+    with open(sys.argv[1], 'r') as md_file:
+        md_text = md_file.read()
 
-html = markdown.markdown(text)
+    # Convert the markdown to HTML
+    html_text = markdown.markdown(md_text)
 
-with open(output_file, 'w') as f:
-    f.write(html)
+    # Write the HTML to the output file
+    with open(sys.argv[2], 'w') as html_file:
+        html_file.write(html_text)
 
-sys.exit(0)
+
+if __name__ == "__main__":
+    main()
