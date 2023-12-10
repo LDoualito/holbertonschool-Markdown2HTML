@@ -27,7 +27,34 @@ def convert_markdown_to_html(markdown_file, output_file):
         print(f"Missing {markdown_file}", file=sys.stderr)
         sys.exit(1)
 
-    # The actual conversion code goes here
+    # Read the Markdown file and process headings
+    with open(markdown_file, 'r') as f:
+        lines = f.readlines()
+
+    # Process each line
+    output_lines = []
+    for line in lines:
+        line = line.rstrip('\n')
+
+        # Check for heading syntax and convert to HTML
+        if line.startswith('# '):
+            output_lines.append(f"<h1>{line[2:]}</h1>")
+        elif line.startswith('## '):
+            output_lines.append(f"<h2>{line[3:]}</h2>")
+        elif line.startswith('### '):
+            output_lines.append(f"<h3>{line[4:]}</h3>")
+        elif line.startswith('#### '):
+            output_lines.append(f"<h4>{line[5:]}</h4>")
+        elif line.startswith('##### '):
+            output_lines.append(f"<h5>{line[6:]}</h5>")
+        elif line.startswith('###### '):
+            output_lines.append(f"<h6>{line[7:]}</h6>")
+        else:
+            output_lines.append(line)
+
+    # Write the HTML output
+    with open(output_file, 'w') as output:
+        output.write('\n'.join(output_lines))
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
