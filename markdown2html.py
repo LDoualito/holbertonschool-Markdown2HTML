@@ -1,24 +1,33 @@
-#!/usr/bin/env python3
+#!/usr/bin/python3
+
+"""
+Converts Markdown to HTML.
+
+Usage: ./markdown2html.py README.md README.html
+"""
+
 import sys
+import os
 
 def convert_markdown_to_html(markdown_file, output_file):
-    # Your markdown to HTML conversion logic here
-    pass
+    """
+    Converts Markdown to HTML.
 
-if len(sys.argv) != 3:
-    print("Usage: ./markdown2html.py README.md README.html", file=sys.stderr)
-    sys.exit(1)
+    Args:
+        markdown_file (str): Name of the Markdown file.
+        output_file (str): Name of the output HTML file.
+    """
+    # Check the number of arguments
+    if len(sys.argv) < 3:
+        print("Usage: ./markdown2html.py README.md README.html", file=sys.stderr)
+        sys.exit(1)
 
-markdown_file = sys.argv[1]
-output_file = sys.argv[2]
+    # Check if the Markdown file exists
+    if not os.path.exists(markdown_file):
+        print(f"Missing {markdown_file}", file=sys.stderr)
+        sys.exit(1)
 
-# Check if the Markdown file exists
-try:
-    with open(markdown_file, 'r'):
-        pass
-except FileNotFoundError:
-    print(f"Missing {markdown_file}", file=sys.stderr)
-    sys.exit(1)
+    # The actual conversion code goes here
 
-# Perform the conversion
-convert_markdown_to_html(markdown_file, output_file)
+if __name__ == "__main__":
+    convert_markdown_to_html(sys.argv[1], sys.argv[2])
