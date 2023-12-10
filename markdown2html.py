@@ -27,7 +27,7 @@ def convert_markdown_to_html(markdown_file, output_file):
             paragraph = False
 
             for line in markdown_file:
-                # Replace double asterisks with <b> and <em> for bold and emphasis
+                # Parse bold syntax
                 line = line.replace('**', '<b>', 1).replace('**', '</b>', 1)
                 line = line.replace('__', '<em>', 1).replace('__', '</em>', 1)
 
