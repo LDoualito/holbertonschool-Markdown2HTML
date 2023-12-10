@@ -1,71 +1,103 @@
 #!/usr/bin/python3
 """
-Parse a Markdown file and turns into HTML
+Parse a Markdown file and convert it to HTML
 """
+import re
+import hashlib
 import sys
+import os
 
-
-def unlist(lines):
-    """Gives ul tags to lines and wraps with <ul>"""
-    wrap = ["<ul>\n",]
-
-    for item in lines:
-        text = item.replace('-', '')
-        text.strip()
-        wrap.append(f"<li>{text.strip()}</li>\n")
-
-    wrap.append("</ul>\n")
-    return "".join(wrap)
-
-
-def headings(lines):
-    """Gives heading tags to lines"""
-    wrap = []
-
-    for item in lines:
-        lvl = item.count('#')
-        text = item.replace('#', '')
-        wrap.append(f"<h{lvl}>{text.strip()}</h{lvl}>\n")
-
-    return "".join(wrap)
-
-
-def read_file(src, dest):
+def convert_markdown_to_html(markdown_file, output_file):
     """
-    Parse Markdown and save as HTML.
-
-    Each line is gonna be wrapped by its own specific tag function
-    and returned as a string saved on @render list, then each item
-    on render is gonna be written in @dest as a string.
+    Convert Markdown to HTML and save it in the output file.
 
     Args:
-        src (str): Source file.
-        dest (str): Destination of source file.
+        markdown_file (str): The name of the Markdown file.
+        output_file (str): The name of the output HTML file.
     """
-    fun_dic = {'#': headings, '-': unlist}
-
-    render = []
-
-    try:
-        with open(src, 'r', encoding='utf-8') as file:
-            content = file.read()
-    except FileNotFoundError:
-        sys.stderr.write(f"Missing {src}\n")
+    if not os.path.exists(markdown_file):
+        sys.stderr.write(f"Missing {markdown_file}\n")
         sys.exit(1)
 
-    for mark in fun_dic:
-        aux = [line for line in content.split('\n') if mark in line]
-        render.append(fun_dic.get(mark)(aux))
+    with open(markdown_file, 'r') as markdown_file:
+        with open(output_file, 'w') as html_file:
+            change_status = False
+            unordered_status = False
+            ordered_status = False
+            paragraph = False
 
-    with open(dest, 'w', encoding='utf-8') as to_html:
-        for line in render:
-            to_html.write("".join(line))
+            for line in markdown_file:
+                # Replace double asterisks with <b> and <em> for bold and emphasis
+                line = line.replace('**', '<b>', 1).replace('**', '</b>', 1)
+                line = line.replace('__', '<em>', 1).replace('__', '</em>', 1)
 
+                # Replace [[...]] with MD5 hash
+                md5_matches = re.findall(r'\[\[(.+?)\]\]', line)
+                if md5_matches:
+                    line = line.replace(md5_matches[0], hashlib.md5(md5_matches[0].encode()).hexdigest())
+
+                # Replace ((...)) with deletion of 'C' or 'c'
+                delete_c_matches = re.findall(r'\(\((.+?)\)\)', line)
+                if delete_c_matches:
+                    remove_c_inside = ''.join(c for c in delete_c_matches[0] if c.lower() != 'c')
+                    line = line.replace(delete_c_matches[0], remove_c_inside)
+
+                length = len(line)
+                headings = line.lstrip('#')
+                heading_count = length - len(headings)
+                unordered = line.lstrip('-')
+                unordered_count = length - len(unordered)
+                ordered = line.lstrip('*')
+                ordered_count = length - len(ordered)
+
+                # Convert headings to HTML
+                if 1 <= heading_count <= 6:
+                    line = f'<h{heading_count}>{headings.strip()}</h{heading_count}>\n'
+
+                # Handle unordered lists
+                if unordered_count:
+                    if not change_status:
+                        html_file.write('<ul>\n')
+                        change_status = True
+                    line = f'<li>{unordered.strip()}</li>\n'
+                if change_status and not unordered_count:
+                    html_file.write('</ul>\n')
+                    change_status = False
+
+                # Handle ordered lists
+                if ordered_count:
+                    if not ordered_status:
+                        html_file.write('<ol>\n')
+                        ordered_status = True
+                    line = f'<li>{ordered.strip()}</li>\n'
+                if ordered_status and not ordered_count:
+                    html_file.write('</ol>\n')
+                    ordered_status = False
+
+                # Handle paragraphs
+                if not (heading_count or change_status or ordered_status):
+                    if not paragraph and length > 1:
+                        html_file.write('<p>\n')
+                        paragraph = True
+                    elif length > 1:
+                        html_file.write('<br/>\n')
+                    elif paragraph:
+                        html_file.write('</p>\n')
+                        paragraph = False
+
+                # Write the line to the HTML file
+                if length > 1:
+                    html_file.write(line)
+
+            # Close remaining HTML tags
+            if ordered_status:
+                html_file.write('</ol>\n')
+            if paragraph:
+                html_file.write('</p>\n')
 
 if __name__ == "__main__":
-    if len(sys.argv) != 3:
+    if len(sys.argv) < 3:
         sys.stderr.write('Usage: ./markdown2html.py README.md README.html\n')
         sys.exit(1)
-
-    read_file(sys.argv[1], sys.argv[2])
+    convert_markdown_to_html(sys.argv[1], sys.argv[2])
     sys.exit(0)
