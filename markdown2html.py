@@ -18,7 +18,7 @@ def convert_markdown_to_html(markdown_file, output_file):
         output_file (str): Name of the output HTML file.
     """
     # Check the number of arguments
-    if len(sys.argv) < 3:
+    if len(sys.argv) != 3:
         print("Usage: ./markdown2html.py README.md README.html", file=sys.stderr)
         sys.exit(1)
 
@@ -30,4 +30,7 @@ def convert_markdown_to_html(markdown_file, output_file):
     # The actual conversion code goes here
 
 if __name__ == "__main__":
+    if len(sys.argv) != 3:
+        print("Usage: ./markdown2html.py README.md README.html", file=sys.stderr)
+        sys.exit(1)
     convert_markdown_to_html(sys.argv[1], sys.argv[2])
